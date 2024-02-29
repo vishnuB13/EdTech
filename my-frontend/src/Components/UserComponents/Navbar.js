@@ -80,9 +80,9 @@ const Navbar = ({name}) => {
     <ul
       style={{
         position: 'absolute',
-        top: '100%', // position it just below the parent
+        top: '100%', 
         left: 0,
-        backgroundColor: 'white', // adjust styles as needed
+        backgroundColor: 'white', 
         border: '1px solid #ccc',
         zIndex: 1,
       }}
@@ -115,7 +115,7 @@ const Navbar = ({name}) => {
         position: 'absolute',
         top: '100%', // position it just below the parent
         left: 0,
-        backgroundColor: 'white', // adjust styles as needed
+        backgroundColor: 'black', // adjust styles as needed
         border: '1px solid #ccc',
         zIndex: 1,
       }}
