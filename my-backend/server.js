@@ -2,11 +2,13 @@ const express = require('express');
 const cookieparser = require('cookie-parser')
 const cors = require('cors')
 const mongoose = require('mongoose')
+require('dotenv').config()
 const userRoutes = require('./routes/userroutes.js')
 const adminRoutes = require('./routes/adminroutes.js')
 const tutorRoutes = require('./routes/Tutorroutes.js')
 const app = express();
-const port = 7000;
+const PORT = process.env.PORT
+const DB_CONNECTION_STRING = process.env.DB_CONNECTION_STRING
 
 const corsOptions = {
   origin: 'http://localhost:3000',
@@ -28,9 +30,9 @@ app.use('/user',userRoutes)
 app.use('/tutor',tutorRoutes)
 
 
-mongoose.connect('mongodb+srv://vishnub4231:Vishnu1234@cluster3.7kv5aim.mongodb.net/EdTech').then(()=>{console.log('mongodb connected successfully')})
+mongoose.connect(DB_CONNECTION_STRING).then(()=>{console.log('mongodb connected successfully')})
 
 app.get('/api',(req,res)=>{res.json({name:"vishnu"})})
-app.listen(port, () => {
+app.listen(PORT, () => {
   console.log(`Backend server is running at http://localhost:${port}`);
 });
