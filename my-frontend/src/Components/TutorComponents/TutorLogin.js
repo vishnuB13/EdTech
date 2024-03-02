@@ -5,81 +5,82 @@ import {toast} from 'react-toastify'
 import axios from 'axios';
 import { useTutorLoginContext } from '../../Context/TutorContext';
 import { GoogleLogin } from '@react-oauth/google';
+import {jwtDecode} from 'jwt-decode'
+
 
 
 
 const TutorLogin = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const {isTutorLoggedIn, tutorlogin }=useTutorLoginContext()
-    const handleLogin = async()=>{
-        try {
-            let formdata = {
-              email:email,
-              password:password
-            }
-            let accesstoken = Cookies.get('tutoraccesstoken')
-            let resp = await axios.post('http://localhost:7000/tutor/login',formdata,{headers:{
-              "Content-Type":"application/json",
-              "Authorization":`Bearer ${accesstoken}`
-            }})
-            if(resp.data.message==='Successfully Logged'){
-              tutorlogin()
-              toast.success("Successfully Logged", {
-                position: 'top-right',
-                autoClose: 3000, // milliseconds
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-              })
-                // After the toast is completed, redirect to the home page
-                console.log(isTutorLoggedIn,"is logged")
-                Cookies.set('tutoraccesstoken', resp.data.tutoraccesstoken, { expires: 7 });
-                window.location.href='/tutor/dashboard'
-              
-            }
-            else if(resp.data.message==='Invalid password'){
-              toast.error("Invalid Password", {
-                position: 'top-right',
-                autoClose: 3000, // milliseconds
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-              })
-            }else {
-              toast.error(resp.data.message, {
-                position: 'top-right',
-                autoClose: 3000, // milliseconds
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-              })
-            }
-          } catch (error) {
-            console.log("Axios Error:", error);  // Log the error to the console
-        
-          toast.error(`Axios Error: ${error.message}`, {
-            position: 'top-right',
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-          });
-          }
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const {isTutorLoggedIn, tutorlogin }=useTutorLoginContext()  
+
+  const handleLogin = async () => {
+    // Your login logic goes here
+  try {
+    let formdata = {
+      email:email,
+      password:password
     }
-    const handleForgotPassword = () => {
-        // Your forgot password logic goes here
-        console.log('Forgot password for:', email);
-      };
+    let accesstoken = Cookies.get('tutoraccesstoken')
+    let resp = await axios.post('http://localhost:7000/tutor/login',formdata,{headers:{
+      "Content-Type":"application/json",
+      "Authorization":`Bearer ${accesstoken}`
+    }})
+    if(resp.data.message==='Successfully Logged'){
+      tutorlogin()
+      toast.success("Successfully Logged", {
+        position: 'top-right',
+        autoClose: 3000, // milliseconds
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      })
+        // After the toast is completed, redirect to the home page
+        Cookies.set('tutoraccesstoken', resp.data.accesstoken, { expires: 7 });
+        window.location.href='/home'
+      
+    }
+    else if(resp.data.message==='Invalid password'){
+      toast.error("Invalid Password", {
+        position: 'top-right',
+        autoClose: 3000, // milliseconds
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      })
+    }else {
+      toast.error(resp.data.message, {
+        position: 'top-right',
+        autoClose: 3000, // milliseconds
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      })
+    }
+  } catch (error) {
+    console.log("Axios Error:", error);  // Log the error to the console
+
+  toast.error(`Axios Error: ${error.message}`, {
+    position: 'top-right',
+    autoClose: 3000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+  });
+  }
     
-      const handleGoogleSignIn = () => {
-        // Your Google sign-in logic goes here
-        console.log('Signing in with Google');
-      };
+  };
+
+  const handleForgotPassword = () => {
+    // Your forgot password logic goes here
+    console.log('Forgot password for:', email);
+
+  };
     return (
         <div className="flex items-center fixed inset-0 justify-center h-screen bg-blue-100">
       <div className="border border-blue-300 bg-white w-full max-w-md p-6 rounded-md shadow-md">
@@ -135,8 +136,25 @@ const TutorLogin = () => {
         <div className="mt-4">
         <GoogleLogin
   onSuccess={credentialResponse => {
-    console.log(credentialResponse);
-  }}
+  const decoded = jwtDecode(credentialResponse.credential)
+  const email = decoded.email
+  const name = decoded.given_name
+  const data = {email:email,name:name}
+  const accesstoken = Cookies.get('tutoraccesstoken')
+  const googleIn=async()=>{
+  let resp = await axios.post('http://localhost:7000/tutor/googlesign',data,{headers:{
+    "Content-Type":"application/json",
+    "Authorization":`Bearer ${accesstoken}`
+  }})
+  const token = resp.data.tutoraccesstoken
+  tutorlogin()
+  
+  Cookies.set('tutoraccesstoken',token)
+  window.location.href='/home'
+}
+  googleIn()
+}}
+
   onError={() => {
     console.log('Login Failed');
   }}

@@ -3,66 +3,102 @@ import Cookies from 'js-cookie';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { GoogleLogin } from '@react-oauth/google';
+import {jwtDecode} from 'jwt-decode'
+import { useAdminLoginContext } from '../../Context/AdminContext';
+
 
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const {isAdminLoggedIn, adminlogin} = useAdminLoginContext()
  
 
   const handleLogin = async () => {
     try {
-      let formdata = {
-        email: email,
-        password: password,
-      };
-  
-      const accesstoken = Cookies.get('admintoken');
-      console.log(accesstoken, 'in admin side');
-  
-      let resp = await axios.post(
-        'http://localhost:7000/admin/login',
-        formdata,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            "Authorization": `Bearer ${accesstoken}`,
-          },
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if(!email || !password){
+       toast.error("Provide Email and password",{
+        position: 'top-right',
+        autoClose: 3000, // milliseconds
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+       })
+      }else if(!emailRegex.test(email)){
+        toast.error("Incorrect Email format",{
+          position: 'top-right',
+          autoClose: 3000, // milliseconds
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+         })
+      }else{
+        let formdata = {
+          email: email,
+          password: password,
+        };
+    
+        const accesstoken = Cookies.get('admintoken');
+        console.log(accesstoken, 'in admin side');
+    
+        let resp = await axios.post(
+          'http://localhost:7000/admin/login',
+          formdata,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              "Authorization": `Bearer ${accesstoken}`,
+            },
+          }
+        );
+    
+        console.log(resp, 'resp');
+        console.log('in login');
+    
+        if (resp.data && resp.data.accesstoken) {
+          toast.success('Successfully logged', {
+            position: 'top-right',
+            autoClose: 3000, // milliseconds
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+          Cookies.set('admintoken', resp.data.accesstoken, { expires: 7 });
+          adminlogin()
+          window.location.href = '/dashboard';
+        }   else if(resp.data.message==='Invalid password'){
+          toast.error("Invalid Password", {
+            position: 'top-right',
+            autoClose: 3000, // milliseconds
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          })
+        }else if (resp.data.message==='incorrect token'){
+          toast.error("Invalid token", {
+            position: 'top-right',
+            autoClose: 3000, // milliseconds
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          })
         }
-      );
-  
-      console.log(resp, 'resp');
-      console.log('in login');
-  
-      if (resp.data && resp.data.accesstoken) {
-        toast.success('Successfully logged', {
-          position: 'top-right',
-          autoClose: 3000, // milliseconds
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
-        Cookies.set('admintoken', resp.data.accesstoken, { expires: 7 });
-        window.location.href = '/dashboard';
-      }   else if(resp.data.message==='Invalid password'){
-        toast.error("Invalid Password", {
-          position: 'top-right',
-          autoClose: 3000, // milliseconds
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        })
-      }else {
-        toast.error(resp.data.message, {
-          position: 'top-right',
-          autoClose: 3000, // milliseconds
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        })
+        else {
+          toast.error(resp.data.message, {
+            position: 'top-right',
+            autoClose: 3000, // milliseconds
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          })
+        }
       }
     } catch (error) {
       console.log("Axios Error:", error);  // Log the error to the console
@@ -78,16 +114,11 @@ const AdminLogin = () => {
     }
   };
   
-
   const handleForgotPassword = () => {
     // Your forgot password logic goes here
     console.log('Forgot password for:', email);
   };
 
-  const handleGoogleSignIn = () => {
-    // Your Google sign-in logic goes here
-    console.log('Signing in with Google');
-  };
 
   return (
     <div className="flex items-center fixed inset-0 justify-center h-screen bg-gradient-to-r from-pink-500 to-teal-500">
@@ -141,19 +172,37 @@ const AdminLogin = () => {
     Forgot Password?
   </button>
 
-  <GoogleLogin
+  <div className="mt-4">
+      <GoogleLogin
   onSuccess={credentialResponse => {
-    console.log(credentialResponse);
-  }}
+  const decoded = jwtDecode(credentialResponse.credential)
+  const email = decoded.email
+  const name = decoded.given_name
+  const data = {email:email,name:name}
+  const accesstoken = Cookies.get('adminaccesstoken')
+  const googleIn=async()=>{
+  let resp = await axios.post('http://localhost:7000/admin/googlesign',data,{headers:{
+    "Content-Type":"application/json",
+    "Authorization":`Bearer ${accesstoken}`
+  }})
+  const token = resp.data.accesstoken
+  adminlogin()
+  
+  Cookies.set('adminaccesstoken',token)
+  window.location.href='/dashboard'
+}
+  googleIn()
+}}
+
   onError={() => {
     console.log('Login Failed');
   }}
 />;
 </div>
-
-        </form>
-      </div>
-    </div>
+ </div>
+   </form>
+ </div>
+</div>
   );
 };
 

@@ -3,14 +3,15 @@ import axios from "axios";
 import React, { useState, useEffect } from "react";
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
-import { useLoginContext } from "../../Context/LoginContext";
+import { useTutorLoginContext } from "../../Context/TutorContext";
 
 const OTPVerification = ({ name, email, password, OTP }) => {
   const [enteredOTP, setEnteredOTP] = useState("");
+  const [verifybutton, setVerifyButton] = useState(true)
   const [timer, setTimer] = useState(60); // Initial timer value in seconds
   const [expired, setExpired] = useState(false);
   const [resendButton, setResendButton] = useState(false);
-  const { login, logout } = useLoginContext();
+  const { tutorlogin, tutorlogout } = useTutorLoginContext();
 
   useEffect(() => {
     const countdown = setTimeout(() => {
@@ -31,7 +32,6 @@ const OTPVerification = ({ name, email, password, OTP }) => {
 
     if (enteredOTP === OTP) {
       // If OTP is correct, you can proceed with further actions
-      console.log("OTP verification successful");
       try {
         let data = await axios.post('http://localhost:7000/tutor/verify-otp', bodydata, {
           headers: {
@@ -61,7 +61,7 @@ const OTPVerification = ({ name, email, password, OTP }) => {
           ).then(() => {
             // After the toast is completed, redirect to the home page
             Cookies.set('tutoraccesstoken', data.data.tutoraccesstoken, { expires: 7 });
-            login();
+            tutorlogin();
             window.location.href = '/tutor/dashboard';
           });
         } else {
@@ -141,11 +141,11 @@ const OTPVerification = ({ name, email, password, OTP }) => {
             ).then(() => {
               // After the toast is completed, redirect to the home page
               Cookies.set('tutoraccesstoken', data.data.tutoraccesstoken, { expires: 7 });
-              login();
+              tutorlogin();
               window.location.href = '/tutor/dashboard';
             });
           } else {
-            toast.error(data.data.message, {
+            toast.error("Invalid token", {
               position: 'top-right',
               autoClose: 3000, // milliseconds
               hideProgressBar: false,
@@ -177,7 +177,7 @@ const OTPVerification = ({ name, email, password, OTP }) => {
           pauseOnHover: true,
           draggable: true,
         });
-        logout();
+        tutorlogout();
         console.log("Incorrect OTP");
         // You can show an error message or take appropriate action
       }
@@ -203,12 +203,12 @@ const OTPVerification = ({ name, email, password, OTP }) => {
         onChange={(e) => setEnteredOTP(e.target.value)}
         className="mt-1 p-2 w-full border rounded-md"
       />
-      <button
+      {verifybutton && <button
         onClick={handleVerify}
         className="mt-4 bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
       >
         Verify OTP
-      </button>
+      </button>}
       <p className="text-color-blue-500">Your OTP will expire in {timer} seconds</p>
       {resendButton && (
         <button
