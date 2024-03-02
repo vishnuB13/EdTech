@@ -9,11 +9,11 @@ import { useLoginContext } from "../../Context/LoginContext";
 
 const OTPVerification = ({ name, email, password, OTP }) => {
   const [enteredOTP, setEnteredOTP] = useState("");
-  const [timer, setTimer] = useState(60); // Initial timer value in seconds
+  const [timer, setTimer] = useState(60);
   const [expired, setExpired] = useState(false);
   const [verify,setVerify]=useState(true)
   const [resendButton, setResendButton] = useState(false);
-  const [otpform,setOtpForm]=useState(false)
+  const [otpform,setOtpForm]=useState(false) 
 
   const { login, logout } = useLoginContext();
 
@@ -33,78 +33,97 @@ const OTPVerification = ({ name, email, password, OTP }) => {
 
   const handleVerify = async () => {
     const bodydata = { name, email, password };
-
-    if (enteredOTP === OTP) {
-      // If OTP is correct, you can proceed with further actions
-      console.log("OTP verification successful");
-      try {
-        let data = await axios.post('http://localhost:7000/user/verify-otp', bodydata, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        console.log(data, "data received");
-        console.log(data.data.message, "message response");
-
-        if (data.data.message === 'Successfully registered') {
-          toast.promise(
-            Promise.resolve(),
-            {
-              pending: 'Processing...',
-              success: 'Successfully registered',
-              error: 'Registration failed',
-            },
-            {
-              position: 'top-right',
-              autoClose: 3000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-            }
-          ).then(() => {
-            // After the toast is completed, redirect to the home page
-            Cookies.set('accesstoken', data.data.accesstoken, { expires: 7 });
-            login();
-            window.location.href = '/home';
-          });
-        } else {
-          toast.error(data.data.message, {
-            position: 'top-right',
-            autoClose: 3000, // milliseconds
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-          });
-          console.log('error in toast');
-        }
-      } catch (error) {
-        console.error('Error in OTP verification:', error);
-      }
-    } else if (expired) {
-      toast.error("OTP has expired", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        pauseOnHover: false,
-        draggable: true,
-      });
-      setExpired(false);
-    } else {
-      // Handle incorrect OTP
-      toast.error("Incorrect OTP", {
+    if(!enteredOTP){
+      toast.error("Enter valid otp", {
         position: 'top-right',
-        autoClose: 3000,
+        autoClose: 3000, // milliseconds
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
-      });
-      console.log("Incorrect OTP");
-      // You can show an error message or take appropriate action
-    }
+      })
+    }else if(enteredOTP.length!==6){
+      toast.error("Invalid 6 digit otp", {
+        position: 'top-right',
+        autoClose: 3000, // milliseconds
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      })
+    }else{
+      if (enteredOTP === OTP) {
+        // If OTP is correct, you can proceed with further actions
+        console.log("OTP verification successful");
+        try {
+          let data = await axios.post('http://localhost:7000/user/verify-otp', bodydata, {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+  
+          console.log(data, "data received");
+          console.log(data.data.message, "message response");
+  
+          if (data.data.message === 'Successfully registered') {
+            toast.promise(
+              Promise.resolve(),
+              {
+                pending: 'Processing...',
+                success: 'Successfully registered',
+                error: 'Registration failed',
+              },
+              {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+              }
+            ).then(() => {
+              // After the toast is completed, redirect to the home page
+              Cookies.set('accesstoken', data.data.accesstoken, { expires: 7 });
+              login();
+              window.location.href = '/home';
+            });
+          } else {
+            toast.error(data.data.message, {
+              position: 'top-right',
+              autoClose: 3000, // milliseconds
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+            });
+            console.log('error in toast');
+          }
+        } catch (error) {
+          console.error('Error in OTP verification:', error);
+        }
+      } else if (expired) {
+        toast.error("OTP has expired", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          pauseOnHover: false,
+          draggable: true,
+        });
+        setExpired(false);
+      } else {
+        // Handle incorrect OTP
+        toast.error("Incorrect OTP", {
+          position: 'top-right',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+        console.log("Incorrect OTP");
+        // You can show an error message or take appropriate action
+      }
+    } 
   };
 
   const handleResendOTP = async () => {

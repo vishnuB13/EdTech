@@ -17,6 +17,7 @@ const RegisterModal = ({ isOpen, onClose }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [password2, setPassword2] = useState("")
   const [otpform, setOtpForm] = useState(false)
   const [otpReady, setOtpReady] = useState(false);
   const [login,setLogin]=useState(false)
@@ -33,7 +34,47 @@ const RegisterModal = ({ isOpen, onClose }) => {
     navigate('/login');
   }
   const handleRegister = async () => {
+
+    
     try {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+       
+
+     if(!email){toast.error("please provide email",{
+      position: 'top-right',
+      autoClose: 3000, // milliseconds
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    })}
+     else if(password!==password2){toast.error("Passwords not matching",{
+      position: 'top-right',
+      autoClose: 3000, // milliseconds
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    })}
+    else if(!password|| !password2){toast.error('please provide password',{
+      position: 'top-right',
+      autoClose: 3000, // milliseconds
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    })}
+    else if(!emailRegex.test(email)){
+      toast.error('Incorrect Email Format',{
+        position: 'top-right',
+        autoClose: 3000, // milliseconds
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      })
+    }
+    else{
       const resp = await axios.post('http://localhost:7000/user/register', formdata, {
         headers: {
           'Content-Type': 'application/json', 
@@ -70,6 +111,9 @@ const RegisterModal = ({ isOpen, onClose }) => {
         }
        } 
       }
+    }
+
+     
     } catch (error) {
       console.error('Error during fetchFormResponse:', error.message); 
     }
@@ -144,6 +188,21 @@ const RegisterModal = ({ isOpen, onClose }) => {
                 placeholder="********"
               />
             </div>
+
+            <div className="mb-4 w-full">
+          <label htmlFor="confirm password" className="block text-sm font-medium text-gray-600">
+            Password
+          </label>
+          <input
+            type="password"
+            id="password2"
+            name="password2"
+            value={password2}
+            onChange={(e) => setPassword2(e.target.value)}
+            className="mt-1 p-2 w-full border rounded-md"
+            placeholder="********"
+          />
+        </div>
 
             <button
               type="button"

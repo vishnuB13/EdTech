@@ -29,8 +29,8 @@ import Cookies from 'js-cookie';
 function App() {
   const [isModalOpen, setIsModalOpen] = useState(true);
   const {isLoggedIn,login,logout}=useLoginContext()
-  const {isTutorLoggedIn} = useTutorLoginContext()
-  const {isAdminLoggedIn} = useAdminLoginContext()
+  const {isTutorLoggedIn,tutorlogin,tutorlogout} = useTutorLoginContext()
+  const {isAdminLoggedIn,adminlogin,adminlogout} = useAdminLoginContext()
   const [name,setName] = useState('')
 useEffect(()=>{
  const accesstoken = Cookies.get('accesstoken')
@@ -60,35 +60,68 @@ useEffect(()=>{
     logout()
    }
  }
+const ifTutorLogged = async()=>{
+  const tutoraccessToken = Cookies.get('tutoraccesstoken')
+  if(tutoraccessToken){
+    axios.defaults.withCredentials=true
+        const response = await axios.post('http://localhost:7000/tutor/details',{},{
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accesstoken}`
+          },
+        })
+        console.log(response,"response in appjs user details")
+        if(response.data.message === 'Invalid token'){tutorlogout()}
+        else{
+          let nama ="Tutor"
+          console.log(nama, "name of tutor")
+          setName(nama)
+          if(nama){
+            tutorlogin()
+          }
+          else{
+            tutorlogout()
+          }
+        }
+}}
+const ifAdminLogged = async()=>{
+  const adminaccesstoken = Cookies.get('admintoken')
+  console.log(adminaccesstoken,"in app if admin logged")
+  if(adminaccesstoken){
+    axios.defaults.withCredentials=true
+        const response = await axios.post('http://localhost:7000/admin/details',{},{
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${adminaccesstoken}`
+          },
+        })
+        console.log(response,"response in appjs user details")
+        if(response.data.message === 'Invalid token'){
+          console.log("in invalid token ")
+          tutorlogout()}
+        else{
+          let nama ="Admin"
+          setName(nama)
+          if(nama){
+            adminlogin()
+            console.log(isAdminLoggedIn,"after setting name in app.js")
+          }
+          else{
+            adminlogout()
+          }
+        }
+}}
+
+
  ifLogged()
+ ifTutorLogged()
+ ifAdminLogged()
+
+ 
+
+
 },[])
-  // useEffect(() => {
-  //   const accessToken = Cookies.get('accesstoken');
 
-  //   if (accessToken) {
-  //     login();
-  //   } else {
-  //     logout();
-  //   }
-  // }, [login, logout]);
-
-  // useEffect(()=>{
-  //   const tutoraccessToken = Cookies.get('tutoraccesstoken')
-  //   console.log(tutoraccessToken,"in useffect in app.js")
-  //   if(tutoraccessToken){
-  //     tutorlogin()
-  //   }else{
-  //     tutorlogout()
-  //   }
-  // },[tutorlogin,tutorlogout])
-
-  // useEffect(()=>{
-  //   const adminToken = Cookies.get('admintoken')
-  //   console.log(adminToken,"in useeffect in app.js admintoken")
-  //   if(adminToken){
-  //     adminlogin()
-  //   }else{adminlogout()}
-  // },[])
   
   const handleCloseModal = () => {
     setIsModalOpen(false);
@@ -96,7 +129,7 @@ useEffect(()=>{
   return (
     <div className="flex flex-col min-h-screen">
       <Router>
-    {isAdminLoggedIn===false && <Navbar name={name} />}  
+     <Navbar name={name} /> 
       <Footer />
 
         <Routes>

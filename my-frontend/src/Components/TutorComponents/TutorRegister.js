@@ -13,6 +13,8 @@ let generatedotp
 
 const TutorRegister = ({ isOpen, onClose }) => {
   // ... (other state variables)
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,42 +36,64 @@ const TutorRegister = ({ isOpen, onClose }) => {
   }
   const handleRegister = async () => {
     try {
-      const resp = await axios.post('http://localhost:7000/tutor/register', formdata, {
-        headers: {
-          'Content-Type': 'application/json', 
-        },
-      });
-      if (resp.status !== 200) {
-        throw new Error('error in network');
-      } else {
-       if(resp.data.message==='tutor already registered'){
-        toast.error(resp.data.message,{
+      if(!email){
+       toast.error("Provide an email",{
+        position: 'top-right',
+        autoClose: 3000, // milliseconds
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+       })
+      }else if(!emailRegex.test(email)){
+        toast.error("Invalid Email Format",{
           position: 'top-right',
           autoClose: 3000, // milliseconds
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
-        })
-       }else if(resp.data.message==='Network error or catch error'){
-        toast.error(resp.data.message,{
-          position: 'top-right',
-          autoClose: 3000, // milliseconds
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        })
-       }
-       else{
-        generatedotp = await resp.data.OTP
-        console.log(generatedotp,"generatedotp")
-        if (await resp.data.otpsend) {
-          setOtpReady(true);
-          setOtpForm(true);
-        }
-       } 
+         })
       }
+      else{
+        const resp = await axios.post('http://localhost:7000/tutor/register', formdata, {
+          headers: {
+            'Content-Type': 'application/json', 
+          },
+        });
+        if (resp.status !== 200) {
+          throw new Error('error in network');
+        } else {
+         if(resp.data.message==='tutor already registered'){
+          toast.error(resp.data.message,{
+            position: 'top-right',
+            autoClose: 3000, // milliseconds
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          })
+         }else if(resp.data.message==='Network error or catch error'){
+          toast.error(resp.data.message,{
+            position: 'top-right',
+            autoClose: 3000, // milliseconds
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          })
+         }
+         else{
+          // generatedotp = await resp.data.OTP
+          // console.log(generatedotp,"generatedotp")
+          if (await resp.data.otpsend) {
+            setOtpReady(true);
+            setOtpForm(true);
+          }
+         } 
+        }
+      }
+     
     } catch (error) {
       console.error('Error during fetchFormResponse:', error.message); 
     }
@@ -90,8 +114,8 @@ const TutorRegister = ({ isOpen, onClose }) => {
   {login ? (
     <TutorLogin />
   ) : (
-    <div className="flex items-center justify-center min-h-screen bg-blue-100">
-      <div className="border border-blue-300 bg-white w-full max-w-md p-6 rounded-md shadow-md">
+    <div className="flex items-center fixed inset-0 justify-center h-screen bg-gradient-to-r from-pink-400 to-teal-500">
+    <div className="border border-blue-300 bg-gradient-to-r from-teal-500 to-pink-400 w-full max-w-md p-6 rounded-md shadow-md flex flex-col items-center">
         {otpReady ? (
           <OTPVerification name={name} email={email} password={password} OTP={generatedotp} />
         ) : (

@@ -17,6 +17,7 @@ export const AdminLoginProvider = ({ children }) => {
   const [isAdminLoggedIn, setAdminLoggedIn] = useState(false);
 
   const adminlogin = () => {
+    console.log('admin logged in called')
     setAdminLoggedIn(true);
   };
 
