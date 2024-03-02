@@ -8,6 +8,9 @@ let accesstoken= Cookies.get('accesstoken')
 let data = {accesstoken:accesstoken}
 let tutoraccesstoken = Cookies.get('tutoraccesstoken')
 let tutordata = {tutoraccesstoken:tutoraccesstoken}
+let admintoken = Cookies.get('admintoken')
+let admindata = {admintoken:admintoken}
+
 
 
 const Navbar = ({name}) => {
@@ -66,7 +69,7 @@ const Navbar = ({name}) => {
           <li><Link to='/about' className="text-white font-bold">About</Link></li>
           <li><Link to='/services' className="text-white font-bold">Services</Link></li>
           <li><Link to='/contact' className="text-white font-bold">Contact</Link></li>
-          {accesstoken === undefined && tutoraccesstoken === undefined ? (
+          {accesstoken === undefined && tutoraccesstoken === undefined && admintoken === undefined ? (
   <li><Link to='/register' className="text-white font-bold">Login</Link></li>
 ) : (
   <li
@@ -99,7 +102,7 @@ const Navbar = ({name}) => {
           <li><Link to='/about' className="text-white font-bold">About</Link></li>
           <li><Link to='/services' className="text-white font-bold">Services</Link></li>
           <li><Link to='/contact' className="text-white font-bold">Contact</Link></li>
-          {accesstoken === undefined && tutoraccesstoken === undefined ? (
+          {accesstoken === undefined && tutoraccesstoken === undefined && admintoken === undefined ? (
   <li><Link to='/register' className="text-white font-bold">Login</Link></li>
 ) : (
   <li

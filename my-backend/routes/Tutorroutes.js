@@ -9,5 +9,6 @@ router.post('/details',authenticateToken,tutorController.getTutorDetails)
 router.post('/verify-otp',tutorController.verifyOtp)
 router.post('/resend-otp',tutorController.resendOtp)
 router.post('/login',tutorController.tutorLogin)
+router.post('/googlesign',tutorController.googleSignIn)
 
 module.exports=router 

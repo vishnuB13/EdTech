@@ -20,7 +20,7 @@ const authenticateToken = (req, res, next) => {
             }
 
             console.log(result, "Result in authenticate token");
-            req.user = result;
+            req.tutor = result;
             next();
         });
     } catch (error) {
