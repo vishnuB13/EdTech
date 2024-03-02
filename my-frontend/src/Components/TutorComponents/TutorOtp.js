@@ -5,7 +5,7 @@ import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import { useTutorLoginContext } from "../../Context/TutorContext";
 
-const OTPVerification = ({ name, email, password, OTP }) => {
+const OTPtutorVerification = ({ name, email, password, OTP }) => {
   const [enteredOTP, setEnteredOTP] = useState("");
   const [verifybutton, setVerifyButton] = useState(true)
   const [timer, setTimer] = useState(60); // Initial timer value in seconds
@@ -29,7 +29,8 @@ const OTPVerification = ({ name, email, password, OTP }) => {
 
   const handleVerify = async () => {
     const bodydata = { name, email, password };
-
+    console.log(enteredOTP,"entered otp")
+    console.log(OTP,'received otp')
     if (enteredOTP === OTP) {
       // If OTP is correct, you can proceed with further actions
       try {
@@ -222,4 +223,4 @@ const OTPVerification = ({ name, email, password, OTP }) => {
   );
 };
 
-export default OTPVerification;
+export default OTPtutorVerification;

@@ -84,33 +84,38 @@ const ifTutorLogged = async()=>{
           }
         }
 }}
-const ifAdminLogged = async()=>{
-  const adminaccesstoken = Cookies.get('admintoken')
-  console.log(adminaccesstoken,"in app if admin logged")
-  if(adminaccesstoken){
-    axios.defaults.withCredentials=true
-        const response = await axios.post('http://localhost:7000/admin/details',{},{
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${adminaccesstoken}`
-          },
-        })
-        console.log(response,"response in appjs user details")
-        if(response.data.message === 'Invalid token'){
-          console.log("in invalid token ")
-          tutorlogout()}
-        else{
-          let nama ="Admin"
-          setName(nama)
-          if(nama){
-            adminlogin()
-            console.log(isAdminLoggedIn,"after setting name in app.js")
-          }
-          else{
-            adminlogout()
-          }
-        }
-}}
+const ifAdminLogged = async () => {
+  const adminaccesstoken = Cookies.get('admintoken');
+  console.log(adminaccesstoken, "in app if admin logged");
+  if (adminaccesstoken) {
+    axios.defaults.withCredentials = true;
+    const response = await axios.post(
+      'http://localhost:7000/admin/details',
+      {},
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${adminaccesstoken}`
+        },
+      }
+    );
+    console.log(response, "response in appjs user details");
+    if (response.data.message === 'Invalid token') {
+      adminlogout();
+    } else if(response.data.admin) {
+      let nama = "Admin";
+      adminlogin()
+      setName(nama);
+      if (nama) {
+        console.log(isAdminLoggedIn, "after setting name in app.js");
+      } else {
+        adminlogout()
+      }
+    }
+    else{adminlogout()}
+  }
+};
+
 
 
  ifLogged()
@@ -145,9 +150,9 @@ const ifAdminLogged = async()=>{
           <Route path='*' element={<Notfound />} />
 
           <Route path='/admin' element={<AdminLogin />} />
-          <Route path='/dashboard' element={isAdminLoggedIn?(<Dashboard />):<Navigate to='/admin'/>} />
+          <Route path='/dashboard' element={isAdminLoggedIn ? (<Dashboard />):(<Navigate to='/admin' />)} />
 
-          <Route path='/tutor' element={isTutorLoggedIn===false && <TutorRegister isOpen={isModalOpen} onClose={handleCloseModal} />} />
+          <Route path='/tutor' element={isTutorLoggedIn===false ? (<TutorRegister isOpen={isModalOpen} onClose={handleCloseModal} />):(<Navigate to='/tutor/dashboard' />)} />
           <Route path='/tutor/login' element={isTutorLoggedIn===false?(<TutorLogin />):(<Navigate to='/tutor/dashboard' />)} />
           <Route path='/tutor/dashboard' element={isTutorLoggedIn? <TutorDashboard />:<Navigate to='/tutor/login'/>} />
 

@@ -4,7 +4,7 @@ const secretKey = 'secret key'
 const authenticateToken=(req,res,next)=>{
     
 const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
-console.log(token,"in authenticate token")
+console.log(token,"in admin authenticate token")
 if(!token){
 return res.sendStatus(403).json({message:"No token"})
 }else{

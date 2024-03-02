@@ -64,7 +64,6 @@ const resendOtp=async(req,res)=>{
 /*Fetching user details */
 const getUserDetails = async (req, res) => {
     try {
-        const secret_key='secret key'
         console.log(req.user,"data in the request")
         let email = req.user.email||req.user
         console.log(email, "req.userin");

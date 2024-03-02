@@ -1,8 +1,10 @@
+const path = require('path')
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+
 const express = require('express');
 const cookieparser = require('cookie-parser')
 const cors = require('cors')
 const mongoose = require('mongoose')
-require('dotenv').config()
 const userRoutes = require('./routes/userroutes.js')
 const adminRoutes = require('./routes/adminroutes.js')
 const tutorRoutes = require('./routes/Tutorroutes.js')
@@ -34,5 +36,5 @@ mongoose.connect(DB_CONNECTION_STRING).then(()=>{console.log('mongodb connected 
 
 app.get('/api',(req,res)=>{res.json({name:"vishnu"})})
 app.listen(PORT, () => {
-  console.log(`Backend server is running at http://localhost:${port}`);
+  console.log(`Backend server is running at http://localhost:${PORT}`);
 });

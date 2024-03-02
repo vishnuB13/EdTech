@@ -12,14 +12,14 @@ import reportWebVitals from './reportWebVitals';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <GoogleOAuthProvider clientId='185441576043-cd48iocgaq1u0g0ooptloqp3k62ijbar.apps.googleusercontent.com'> 
-    <LoginProvider>
-      <AdminLoginProvider>
-        <TutorLoginProvider>
-      <App />
-      </TutorLoginProvider>
-      </AdminLoginProvider>
-    </LoginProvider>
+     <GoogleOAuthProvider clientId='185441576043-cd48iocgaq1u0g0ooptloqp3k62ijbar.apps.googleusercontent.com'>
+      <LoginProvider>
+        <AdminLoginProvider>
+          <TutorLoginProvider>
+            <App />
+          </TutorLoginProvider>
+        </AdminLoginProvider>
+      </LoginProvider>
     </GoogleOAuthProvider>
   </React.StrictMode>
 );

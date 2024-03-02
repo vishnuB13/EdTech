@@ -41,9 +41,49 @@ const adminLogout = async(req,res)=>{
         console.log(error,"error in admin Loout")
     }
 }
+const googleSignIn= async(req,res)=>{
+  try {
+    const secret_key= "secret key"
+const email = req.body.email
+const name = req.body.name
+let userAlreadyExist= await User.findOne({email:email})
+if(userAlreadyExist){
+const newtoken = jwt.sign({email:email},secret_key)
+res.json({accesstoken:newtoken,name:userAlreadyExist.name})
+}
+else{
+const newUser = {email,name,password:"password"}
+let googleSign = await User.create(newUser);
+const accesstoken = jwt.sign({email:email},secret_key)
+const data = {"accesstoken":accesstoken,name:name}
+res.json(data)
+}
+} catch (error) {
+  console.log(error,'google error')  
+}
+}
+
+const adminDetails = async(req,res)=>{
+  try {
+    console.log(req.admin,"data in the request")
+    let email = req.admin.email||req.admin
+    console.log(email, "req.userin");
+    let admin = await Admin.findOne({ email: email }); // Use findOne instead of find for a single user
+    if (admin) {
+        res.json({admin});
+    } else {
+        res.json({ message: "No data found" });
+    }
+} catch (error) {
+    res.status(500).json({ message: "Error occurred in getting details" });
+    console.log(error, "Error in getting user details");
+}
+}
 
 
 module.exports={
     getLogin,
-    adminLogout
+    adminLogout,
+    googleSignIn,
+    adminDetails
 }

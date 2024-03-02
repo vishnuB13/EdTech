@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const Tutor = require('../models/tutorSchema')
+const mongoose = require('mongoose')
+const Tutor = require('../models/tutorSchema.js')
 const mailHelper = require('../helper/mail.js')
 
 const postRegister=async(req,res)=>{
@@ -54,7 +55,7 @@ const resendOtp=async(req,res)=>{
 const getTutorDetails = async (req, res) => {
     try {
         const secret_key='secret key'
-        let email = req.user;
+        let email = req.tutor.email||req.tutor
         console.log(email, "req.userin");
         let user = await Tutor.findOne({ email: email }); // Use findOne instead of find for a single user
         if (user) {
@@ -90,10 +91,33 @@ const tutorLogin = async(req,res)=>{
         console.log(error,"error in catch")
     }
     }
+    const googleSignIn=async(req,res)=>{
+        try {
+    const secret_key= "secret key"
+    const email = req.body.email
+    const name = req.body.name
+    let userAlreadyExist= await User.findOne({email:email})
+    if(userAlreadyExist){
+        const newtoken = jwt.sign({email:email},secret_key)
+        res.json({tutoraccesstoken:newtoken,name:userAlreadyExist.name})
+    }
+    else{
+        const newUser = {email,name,password:"password"}
+        let googleSign = await User.create(newUser);
+        const tutoraccesstoken = jwt.sign({email:email},secret_key)
+        const data = {"tutoraccesstoken":tutoraccesstoken,name:name}
+        res.json(data)
+    
+    }
+        } catch (error) {
+          console.log(error,'google error')  
+        }
+    }
 module.exports={
     postRegister,
     verifyOtp,
     resendOtp,
     getTutorDetails,
-    tutorLogin
+    tutorLogin,
+    googleSignIn
 }
