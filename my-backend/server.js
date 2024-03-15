@@ -14,7 +14,7 @@ const DB_CONNECTION_STRING = process.env.DB_CONNECTION_STRING
 
 const corsOptions = {
   origin: 'http://localhost:3000',
-  methods:'GET',
+  methods:['GET', 'PUT'],
   optionsSuccessStatus: 200,
   credentials: true 
 };
@@ -34,7 +34,6 @@ app.use('/tutor',tutorRoutes)
 
 mongoose.connect(DB_CONNECTION_STRING).then(()=>{console.log('mongodb connected successfully')})
 
-app.get('/api',(req,res)=>{res.json({name:"vishnu"})})
 app.listen(PORT, () => {
   console.log(`Backend server is running at http://localhost:${PORT}`);
 });

@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import { useLoginContext } from "../../Context/LoginContext";
+import baseURL from "../../apiConfig";
+import toastoptions from "../../toastConfig";
 
 
 
@@ -34,36 +36,19 @@ const OTPVerification = ({ name, email, password, OTP }) => {
   const handleVerify = async () => {
     const bodydata = { name, email, password };
     if(!enteredOTP){
-      toast.error("Enter valid otp", {
-        position: 'top-right',
-        autoClose: 3000, // milliseconds
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      })
+      toast.error("Enter valid otp",toastoptions )
     }else if(enteredOTP.length!==6){
-      toast.error("Invalid 6 digit otp", {
-        position: 'top-right',
-        autoClose: 3000, // milliseconds
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      })
+      toast.error("Invalid 6 digit otp",toastoptions)
     }else{
       if (enteredOTP === OTP) {
         // If OTP is correct, you can proceed with further actions
         console.log("OTP verification successful");
         try {
-          let data = await axios.post('http://localhost:7000/user/verify-otp', bodydata, {
+          let data = await axios.post(`${baseURL}/user/password-otp`, bodydata, {
             headers: {
               'Content-Type': 'application/json',
             },
           });
-  
-          console.log(data, "data received");
-          console.log(data.data.message, "message response");
   
           if (data.data.message === 'Successfully registered') {
             toast.promise(
@@ -88,38 +73,18 @@ const OTPVerification = ({ name, email, password, OTP }) => {
               window.location.href = '/home';
             });
           } else {
-            toast.error(data.data.message, {
-              position: 'top-right',
-              autoClose: 3000, // milliseconds
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-            });
+            toast.error(data.data.message, toastoptions);
             console.log('error in toast');
           }
         } catch (error) {
           console.error('Error in OTP verification:', error);
         }
       } else if (expired) {
-        toast.error("OTP has expired", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          pauseOnHover: false,
-          draggable: true,
-        });
+        toast.error("OTP has expired",toastoptions);
         setExpired(false);
       } else {
         // Handle incorrect OTP
-        toast.error("Incorrect OTP", {
-          position: 'top-right',
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
+        toast.error("Incorrect OTP",toastoptions);
         console.log("Incorrect OTP");
         // You can show an error message or take appropriate action
       }
@@ -138,26 +103,17 @@ const OTPVerification = ({ name, email, password, OTP }) => {
 
      
         // try {
-          let data = await axios.post('http://localhost:7000/user/resend-otp', bodydata, {
+          let data = await axios.post(`${baseURL}/user/resend-otp`, bodydata, {
             headers: {
               'Content-Type': 'application/json',
             },
           });
-  
-          console.log(data, "data received");
-          console.log(data.data.message, "message response");
+
   
           if(data.data.otpsend){
             setOtpForm(true)
            }else{
-            toast.error("otp resending error",{
-              position: 'top-right',
-              autoClose: 3000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-            })
+            toast.error("otp resending error",toastoptions)
           }
     } catch (error) {
       console.error('Error in resending OTP:', error);

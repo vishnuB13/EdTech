@@ -1,6 +1,9 @@
 import React, { useEffect } from 'react';
 import axios from 'axios';
 import { useState } from 'react';
+import baseURL from './apiConfig.js';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectIsAdminAuthenticated, setAdminAuthenticated } from './redux/slices/adminAuthSlice.js';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Navbar from './Components/UserComponents/Navbar.js';
 import Footer from './Components/UserComponents/Footer.js';
@@ -10,6 +13,10 @@ import Services from './Components/UserComponents/Services.js';
 import Contact from './Components/UserComponents/Contact.js';
 import RegisterModal from './Components/UserComponents/Register.js';
 import Profile from './Components/UserComponents/Profile.js';
+import ForgotPassword from './Components/UserComponents/forgotPassword.js';
+import Otpverify from './Components/UserComponents/Verifyotp.js';
+
+
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Home from './Components/UserComponents/Home.js';
@@ -20,24 +27,28 @@ import Dashboard from './Components/AdminComponents/Dashboard.js';
 import TutorDashboard from './Components/TutorComponents/TutorDashboard.js';
 import TutorLogin from './Components/TutorComponents/TutorLogin.js';
 import TutorRegister from './Components/TutorComponents/TutorRegister.js'
+
 import { useLoginContext } from './Context/LoginContext.js';
 import { useTutorLoginContext } from './Context/TutorContext.js';
-import { useAdminLoginContext } from './Context/AdminContext.js';
+
 import Cookies from 'js-cookie';
+import NewPassword from './Components/UserComponents/NewPassword.js';
 
-
-function App() {
+ function App() {
   const [isModalOpen, setIsModalOpen] = useState(true);
   const {isLoggedIn,login,logout}=useLoginContext()
+  const isAdminAuthenticated = useSelector(selectIsAdminAuthenticated);
+  console.log(isAdminAuthenticated,"in authenticate app.js")
+  const dispatch = useDispatch()
+
   const {isTutorLoggedIn,tutorlogin,tutorlogout} = useTutorLoginContext()
-  const {isAdminLoggedIn,adminlogin,adminlogout} = useAdminLoginContext()
   const [name,setName] = useState('')
 useEffect(()=>{
  const accesstoken = Cookies.get('accesstoken')
  const ifLogged=async()=>{
   if(accesstoken){
     axios.defaults.withCredentials=true
-        const response = await axios.post('http://localhost:7000/user/details',{},{
+        const response = await axios.post(`${baseURL}/user/details`,{},{
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${accesstoken}`
@@ -64,7 +75,7 @@ const ifTutorLogged = async()=>{
   const tutoraccessToken = Cookies.get('tutoraccesstoken')
   if(tutoraccessToken){
     axios.defaults.withCredentials=true
-        const response = await axios.post('http://localhost:7000/tutor/details',{},{
+        const response = await axios.post(`${baseURL}/tutor/details`,{},{
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${accesstoken}`
@@ -86,11 +97,10 @@ const ifTutorLogged = async()=>{
 }}
 const ifAdminLogged = async () => {
   const adminaccesstoken = Cookies.get('admintoken');
-  console.log(adminaccesstoken, "in app if admin logged");
   if (adminaccesstoken) {
     axios.defaults.withCredentials = true;
     const response = await axios.post(
-      'http://localhost:7000/admin/details',
+      `${baseURL}/admin/details`,
       {},
       {
         headers: {
@@ -99,32 +109,31 @@ const ifAdminLogged = async () => {
         },
       }
     );
-    console.log(response, "response in appjs user details");
     if (response.data.message === 'Invalid token') {
-      adminlogout();
+       dispatch(setAdminAuthenticated(false))
     } else if(response.data.admin) {
       let nama = "Admin";
-      adminlogin()
-      setName(nama);
+    
       if (nama) {
-        console.log(isAdminLoggedIn, "after setting name in app.js");
+        setName(nama);
+        await dispatch(setAdminAuthenticated(true))
       } else {
-        adminlogout()
+       dispatch(setAdminAuthenticated(false)
+       )
       }
     }
-    else{adminlogout()}
+    else{dispatch(setAdminAuthenticated(false))}
   }
 };
 
 
 
- ifLogged()
- ifTutorLogged()
- ifAdminLogged()
-
- 
-
-
+ const authCall = async()=>{
+ await ifLogged()
+ await ifTutorLogged()
+ await ifAdminLogged()
+ }
+ authCall()
 },[])
 
   
@@ -132,10 +141,10 @@ const ifAdminLogged = async () => {
     setIsModalOpen(false);
   };
   return (
-    <div className="flex flex-col min-h-screen">
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Router>
      <Navbar name={name} /> 
-      <Footer />
+      
 
         <Routes>
           <Route path="/" element={<LandingPage />} />
@@ -146,11 +155,15 @@ const ifAdminLogged = async () => {
           <Route path='/home'  element={isLoggedIn ? <Home name={name}/>:<Navigate to='/login'/>} />
           <Route path='/profile' element={<Profile />} />
           <Route path='/login' element={isLoggedIn===false?(<Login />):(<Navigate to='/home'/>)} />
+          <Route path='/forgot_password' element={<ForgotPassword />} />
+          <Route path='/otp_verification' element={<Otpverify />} />
+          <Route path='/new_password' element={<NewPassword />} />
+          
 
           <Route path='*' element={<Notfound />} />
 
-          <Route path='/admin' element={<AdminLogin />} />
-          <Route path='/dashboard' element={isAdminLoggedIn ? (<Dashboard />):(<Navigate to='/admin' />)} />
+          <Route path='/admin' element={!isAdminAuthenticated ? (<AdminLogin />):(<Navigate to='/dashboard' />) } />
+          <Route path='/dashboard' element={isAdminAuthenticated===true ? (<Dashboard name={name} />):(<Navigate to='/admin' />) } />
 
           <Route path='/tutor' element={isTutorLoggedIn===false ? (<TutorRegister isOpen={isModalOpen} onClose={handleCloseModal} />):(<Navigate to='/tutor/dashboard' />)} />
           <Route path='/tutor/login' element={isTutorLoggedIn===false?(<TutorLogin />):(<Navigate to='/tutor/dashboard' />)} />
@@ -159,6 +172,7 @@ const ifAdminLogged = async () => {
         </Routes>
         <ToastContainer />
       </Router>
+      <Footer />
     </div>
   );
 }

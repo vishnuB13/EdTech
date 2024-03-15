@@ -6,6 +6,8 @@ import LoadingUI from "../UserComponents/Loading.js";
 import TutorLogin from "./TutorLogin.js";
 import axios from 'axios'
 import { toast } from "react-toastify";
+import baseURL from "../../apiConfig.js";
+import toastoptions from "../../toastConfig.js";
 const OTPtutorVerification = React.lazy(() => import('../TutorComponents/TutorOtp.js'));
 
 
@@ -38,26 +40,12 @@ const TutorRegister = ({ isOpen, onClose }) => {
   const handleRegister = async () => {
     try {
       if(!email){
-       toast.error("Provide an email",{
-        position: 'top-right',
-        autoClose: 3000, // milliseconds
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-       })
+       toast.error("Provide an email",toastoptions)
       }else if(!emailRegex.test(email)){
-        toast.error("Invalid Email Format",{
-          position: 'top-right',
-          autoClose: 3000, // milliseconds
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-         })
+        toast.error("Invalid Email Format",toastoptions)
       }
       else{
-        const resp = await axios.post('http://localhost:7000/tutor/register', formdata, {
+        const resp = await axios.post(`${baseURL}/tutor/register`, formdata, {
           headers: {
             'Content-Type': 'application/json', 
           },
@@ -68,23 +56,9 @@ const TutorRegister = ({ isOpen, onClose }) => {
           throw new Error('error in network');
         } else {
          if(resp.data.message==='tutor already registered'){
-          toast.error(resp.data.message,{
-            position: 'top-right',
-            autoClose: 3000, // milliseconds
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-          })
+          toast.error(resp.data.message,toastoptions)
          }else if(resp.data.message==='Network error or catch error'){
-          toast.error(resp.data.message,{
-            position: 'top-right',
-            autoClose: 3000, // milliseconds
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-          })
+          toast.error(resp.data.message,toastoptions)
          }
          else{
           // generatedotp = await resp.data.OTP

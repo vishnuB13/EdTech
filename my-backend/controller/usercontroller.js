@@ -45,6 +45,59 @@ const verifyOtp=async(req,res)=>{
     }
 }
 
+// User Otp Send
+const sendOtp = async(req,res)=>{
+    try {
+        const {email} = req.body
+        console.log(email,"email in sendotp body")
+        let OTP = await mailHelper.sendOTPByEmail(email)
+        console.log(OTP,"otp from server")
+        res.json({message:"Otp send successfully",OTP:OTP})
+        
+    } catch (error) {
+        res.json({message:"Otp send failed"})
+    }
+}
+
+// Password Otp Verify
+const passwordOtp = async(req,res)=>{
+    try {
+        const {email,OTP,enteredOTP} = req.body
+        console.log(email,"email")
+        console.log(OTP,"generated")
+        console.log(enteredOTP,"entered")
+        if(enteredOTP === OTP){
+            res.json({message:"correct otp"})
+        }
+        else{
+            res.json({message:"incorrect otp"})
+        }
+
+    } catch (error) {
+        res.json({message:"error occurred"})
+    }
+}
+
+// Change Password
+const changePassword = async(req,res)=>{
+    console.log("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
+    try {
+        const {password,email} = req.body
+        let user = await User.findOne({email})
+        if(user){
+        let hashedpassword = await bcrypt.hash(password,10)
+        user.password=hashedpassword
+        await user.save()
+        res.json({message:"Successfully Changed"})
+        }else{
+            res.json({message:"User Not Found"})
+        }   
+    } catch (error) {
+        console.log(error,"catch error in usercontroller changePassword")
+    }
+}
+
+
 // User Otp Resend
 const resendOtp=async(req,res)=>{
    try {
@@ -122,10 +175,6 @@ else{
     res.json(data)
 
 }
-
-
-
-
     } catch (error) {
       console.log(error,'google error')  
     }
@@ -151,6 +200,9 @@ module.exports={
     userRegister,
     verifyOtp,
     resendOtp,
+    sendOtp,
+    passwordOtp,
+    changePassword,
     userLogin,
     googleSignIn,
     getUserDetails,

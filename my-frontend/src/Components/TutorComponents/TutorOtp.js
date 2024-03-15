@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import { useTutorLoginContext } from "../../Context/TutorContext";
+import baseURL from "../../apiConfig";
+import toastoptions from "../../toastConfig";
 
 const OTPtutorVerification = ({ name, email, password, OTP }) => {
   const [enteredOTP, setEnteredOTP] = useState("");
@@ -34,7 +36,7 @@ const OTPtutorVerification = ({ name, email, password, OTP }) => {
     if (enteredOTP === OTP) {
       // If OTP is correct, you can proceed with further actions
       try {
-        let data = await axios.post('http://localhost:7000/tutor/verify-otp', bodydata, {
+        let data = await axios.post(`${baseURL}/tutor/verify-otp`, bodydata, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -66,38 +68,18 @@ const OTPtutorVerification = ({ name, email, password, OTP }) => {
             window.location.href = '/tutor/dashboard';
           });
         } else {
-          toast.error(data.data.message, {
-            position: 'top-right',
-            autoClose: 3000, // milliseconds
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-          });
+          toast.error(data.data.message, toastoptions);
           console.log('error in toast');
         }
       } catch (error) {
         console.error('Error in OTP verification:', error);
       }
     } else if (expired) {
-      toast.error("OTP has expired", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        pauseOnHover: false,
-        draggable: true,
-      });
+      toast.error("OTP has expired", toastoptions);
       setExpired(false);
     } else {
       // Handle incorrect OTP
-      toast.error("Incorrect OTP", {
-        position: 'top-right',
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
+      toast.error("Incorrect OTP", toastoptions);
       console.log("Incorrect OTP");
       // You can show an error message or take appropriate action
     }
@@ -114,7 +96,7 @@ const OTPtutorVerification = ({ name, email, password, OTP }) => {
       if (enteredOTP === OTP) {
         // If OTP is correct, you can proceed with further actions
         try {
-          let data = await axios.post('http://localhost:7000/tutor/verify-otp', bodydata, {
+          let data = await axios.post(`${baseURL}/tutor/verify-otp`, bodydata, {
             headers: {
               'Content-Type': 'application/json',
             },
@@ -146,44 +128,23 @@ const OTPtutorVerification = ({ name, email, password, OTP }) => {
               window.location.href = '/tutor/dashboard';
             });
           } else {
-            toast.error("Invalid token", {
-              position: 'top-right',
-              autoClose: 3000, // milliseconds
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-            });
+            toast.error("Invalid token",toastoptions);
             console.log('error in toast');
           }
         } catch (error) {
           console.error('Error in OTP verification:', error);
         }
       } else if (expired) {
-        toast.error("OTP has expired", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          pauseOnHover: false,
-          draggable: true,
-        });
+        toast.error("OTP has expired", toastoptions);
         setExpired(false);
       } else {
         // Handle incorrect OTP
-        toast.error("Incorrect OTP", {
-          position: 'top-right',
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
+        toast.error("Incorrect OTP", toastoptions);
         tutorlogout();
         console.log("Incorrect OTP");
         // You can show an error message or take appropriate action
       }
      
-      // Add logic to resend OTP (e.g., make an API call to request a new OTP)
     } catch (error) {
       console.error('Error in resending OTP:', error);
     }

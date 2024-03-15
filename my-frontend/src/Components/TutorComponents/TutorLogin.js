@@ -6,6 +6,8 @@ import axios from 'axios';
 import { useTutorLoginContext } from '../../Context/TutorContext';
 import { GoogleLogin } from '@react-oauth/google';
 import {jwtDecode} from 'jwt-decode'
+import baseURL from '../../apiConfig';
+import toastoptions from '../../toastConfig';
 
 
 
@@ -23,57 +25,28 @@ const TutorLogin = () => {
       password:password
     }
     let accesstoken = Cookies.get('tutoraccesstoken')
-    let resp = await axios.post('http://localhost:7000/tutor/login',formdata,{headers:{
+    let resp = await axios.post(`${baseURL}/tutor/login`,formdata,{headers:{
       "Content-Type":"application/json",
       "Authorization":`Bearer ${accesstoken}`
     }})
     if(resp.data.message==='Successfully Logged'){
       tutorlogin()
-      toast.success("Successfully Logged", {
-        position: 'top-right',
-        autoClose: 3000, // milliseconds
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      })
+      toast.success("Successfully Logged", toastoptions)
         // After the toast is completed, redirect to the home page
         Cookies.set('tutoraccesstoken', resp.data.accesstoken, { expires: 7 });
         window.location.href='/home'
       
     }
     else if(resp.data.message==='Invalid password'){
-      toast.error("Invalid Password", {
-        position: 'top-right',
-        autoClose: 3000, // milliseconds
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      })
+      toast.error("Invalid Password", toastoptions)
     }else {
-      toast.error(resp.data.message, {
-        position: 'top-right',
-        autoClose: 3000, // milliseconds
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      })
+      toast.error(resp.data.message,toastoptions)
     }
   } catch (error) {
     console.log("Axios Error:", error);  // Log the error to the console
 
-  toast.error(`Axios Error: ${error.message}`, {
-    position: 'top-right',
-    autoClose: 3000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-  });
-  }
-    
+  toast.error(`Axios Error: ${error.message}`, toastoptions);
+  }  
   };
 
   const handleForgotPassword = () => {
