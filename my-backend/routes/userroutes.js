@@ -11,4 +11,7 @@ router.post('/details',userAuthenticate,usercontroller.getUserDetails)
 router.post('/login',usercontroller.userLogin)
 router.post('/googlesign',usercontroller.googleSignIn)
 router.get('/logout',usercontroller.userLogout)
+router.post('/send_otp',usercontroller.sendOtp)
+router.post('/password_otp',usercontroller.passwordOtp)
+router.put('/change_password',usercontroller.changePassword)
 module.exports=router;

@@ -2,25 +2,28 @@
 
 import React from 'react';
 import firstFrame from '../../images/firstFrame.jpg';
+import coursea from '../../images/coursea.jpg'
+import course2 from '../../images/course2.jpeg'
+import course3 from '../../images/course3.jpeg'
 
 const LandingPage = () => {
   const courses = [
     {
       _id: 1,
       title: 'Course 1',
-      image: 'course1.jpg', // Replace with actual image URL
+      image: coursea, // Replace with actual image URL
       description: 'Description for Course 1',
     },
     {
       _id: 2,
       title: 'Course 2',
-      image: 'course2.jpg', // Replace with actual image URL
+      image: course2, // Replace with actual image URL
       description: 'Description for Course 2',
     },
     {
       _id: 3,
       title: 'Course 3',
-      image: 'course3.jpg', // Replace with actual image URL
+      image: course3, // Replace with actual image URL
       description: 'Description for Course 3',
     },
   ];
@@ -41,7 +44,7 @@ const LandingPage = () => {
       <img
         src={firstFrame}
         alt="Your Alt Text"
-        className="max-w-full h-auto md:max-w-md object-contain rounded-full"
+        className="max-w-full h-auto md:max-w-md object-contain "
       />
     </div>
   </header>
@@ -50,19 +53,24 @@ const LandingPage = () => {
 
       {/* Featured Courses Section */}
       <section className="bg-gray-200 py-10 flex-1">
-        <div className="container mx-auto">
-          <h2 className="text-2xl font-bold mb-6">Featured Courses</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {courses.map((course) => (
-              <div key={course._id} className="bg-white p-6 rounded-md shadow-md mb-4">
-                <img src={course.image} alt={course.title} className="mb-4 rounded-md" />
-                <h3 className="text-xl font-semibold mb-2">{course.title}</h3>
-                <p className="text-gray-600">{course.description}</p>
-              </div>
-            ))}
-          </div>
+  <div className="container mx-auto">
+    <h2 className="text-2xl font-bold mb-6">Featured Courses</h2>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {courses.map((course) => (
+        <div key={course._id} className="bg-gradient-to-r from-teal-500 to-pink-500 p-6 rounded-md shadow-md mb-4">
+          <img
+            src={course.image}
+            alt={course.title}
+            className="mb-4 rounded-md"
+            style={{ width: '100%', height: '200px' }} // Set a fixed height and width
+          />
+          <h3 className="text-xl text-white font-semibold mb-2">{course.title}</h3>
+          <p className="text-white">{course.description}</p>
         </div>
-      </section>
+      ))}
+    </div>
+  </div>
+</section>
 
       {/* Footer Section */}
       <footer className="bg-gradient-to-r from-pink-500 to-teal-500 text-white text-center py-6">

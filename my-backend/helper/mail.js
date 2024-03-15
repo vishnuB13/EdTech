@@ -17,7 +17,7 @@ const sendOTPByEmail = async (email) => {
       service: 'gmail',
       auth: {
         user: 'vishnub4231@gmail.com',
-        pass: 'ckqt qism dqnm ytry',
+        pass: 'jjee bqqg vnoe ohas',
       },
     });
 

@@ -4,12 +4,15 @@ import {toast} from 'react-toastify'
 import { Link } from 'react-router-dom';
 import Logo from '../../logo.svg';
 import Cookies from 'js-cookie';
+import baseURL from '../../apiConfig';
+import toastoptions from '../../toastConfig';
 let accesstoken= Cookies.get('accesstoken')
 let data = {accesstoken:accesstoken}
 let tutoraccesstoken = Cookies.get('tutoraccesstoken')
 let tutordata = {tutoraccesstoken:tutoraccesstoken}
-let admintoken = Cookies.get('admintoken')
+let admintoken = await Cookies.get('admintoken')
 let admindata = {admintoken:admintoken}
+
 
 
 
@@ -28,21 +31,15 @@ const Navbar = ({name}) => {
   
   const handleLogout = async()=>{
     try {
-      const resp = await axios.get('http://localhost:7000/user/logout')
+      const resp = await axios.get(`${baseURL}/user/logout`)
       if(resp.data.message==='successfully logged out'){
         window.location.href='/'
       }else{
-        toast.error("Logout unsuccessful",{
-          position: 'top-right',
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        })
+        toast.error("Logout unsuccessful",toastoptions)
       }
     } catch (error) {
       console.log(error,"errorin logout") 
+      toast.error("catch error",toastoptions)
     }
    
   }
@@ -90,8 +87,8 @@ const Navbar = ({name}) => {
         zIndex: 1,
       }}
     >
-      <li>Profile</li>
-      <li onClick={handleLogout}>Logout</li>
+      <li className='bg-gradient-to-r from-pink-500 to-teal-500'>Profile</li>
+      <li className='bg-gradient-to-r from-pink-500 to-teal-500' onClick={handleLogout}>Logout</li>
     </ul>
   )}
 </li>)}    </ul>
@@ -123,8 +120,8 @@ const Navbar = ({name}) => {
         zIndex: 1,
       }}
     >
-      <li>Profile</li>
-      <li onClick={handleLogout}>Logout</li>
+      <li className='bg-gradient-to-r from-pink-500 to-teal-500'>Profile</li>
+      <li className='bg-gradient-to-r from-pink-500 to-teal-500' onClick={handleLogout}>Logout</li>
     </ul>
   )}
 </li>)}

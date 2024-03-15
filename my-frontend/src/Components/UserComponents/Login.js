@@ -1,83 +1,51 @@
 import axios from 'axios';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {toast} from 'react-toastify'
 import Cookies from 'js-cookie';
 import { useLoginContext } from '../../Context/LoginContext';
 import { GoogleLogin } from '@react-oauth/google';
 import {jwtDecode} from 'jwt-decode'
+import baseURL from '../../apiConfig';
+import toastoptions from '../../toastConfig';
+
+
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const {isLoggedIn, login }=useLoginContext()  
+  const navigate = useNavigate()
 
   const handleLogin = async () => {
     // Your login logic goes here
   try {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if(!email || !password){
-       toast.error("Provide Email and password",{
-        position: 'top-right',
-        autoClose: 3000, // milliseconds
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-       })
+       toast.error("Provide Email and password",toastoptions)
       }else if(!emailRegex.test(email)){
-        toast.error("Incorrect Email format",{
-          position: 'top-right',
-          autoClose: 3000, // milliseconds
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-         })
+        toast.error("Incorrect Email format",toastoptions)
       }else{
         let formdata = {
           email:email,
           password:password
         }
         let accesstoken = Cookies.get('accesstoken')
-        let resp = await axios.post('http://localhost:7000/user/login',formdata,{headers:{
+        let resp = await axios.post(`${baseURL}/user/login`,formdata,{headers:{
           "Content-Type":"application/json",
           "Authorization":`Bearer ${accesstoken}`
         }})
         if(resp.data.message==='Successfully Logged'){
-          console.log(isLoggedIn,"before login")
           login()
-          console.log(isLoggedIn,"after login")
-          toast.success("Successfully Logged", {
-            position: 'top-right',
-            autoClose: 3000, // milliseconds
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-          })
+          toast.success("Successfully Logged",toastoptions)
             // After the toast is completed, redirect to the home page
-            console.log(isLoggedIn,"is logged")
             Cookies.set('accesstoken', resp.data.accesstoken, { expires: 7 });
             window.location.href='/home'  
         }
         else if(resp.data.message==='Invalid password'){
-          toast.error("Invalid Password", {
-            position: 'top-right',
-            autoClose: 3000, // milliseconds
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-          })
+          toast.error("Invalid Password",toastoptions)
         }else {
-          toast.error(resp.data.message, {
-            position: 'top-right',
-            autoClose: 3000, // milliseconds
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-          })
+          toast.error(resp.data.message, toastoptions)
         }
       }
 
@@ -85,22 +53,14 @@ const Login = () => {
   } catch (error) {
     console.log("Axios Error:", error);  // Log the error to the console
 
-  toast.error(`Axios Error: ${error.message}`, {
-    position: 'top-right',
-    autoClose: 3000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-  });
+  toast.error(`Axios Error: ${error.message}`,toastoptions);
   }
     
   };
 
   const handleForgotPassword = () => {
     // Your forgot password logic goes here
-    console.log('Forgot password for:', email);
-
+    navigate('/forgot_password')
   };
  
 
@@ -165,7 +125,7 @@ const Login = () => {
   const data = {email:email,name:name}
   const accesstoken = Cookies.get('accesstoken')
   const googleIn=async()=>{
-  let resp = await axios.post('http://localhost:7000/user/googlesign',data,{headers:{
+  let resp = await axios.post(`${baseURL}/user/googlesign`,data,{headers:{
     "Content-Type":"application/json",
     "Authorization":`Bearer ${accesstoken}`
   }})
@@ -173,7 +133,7 @@ const Login = () => {
   login()
   
   Cookies.set('accesstoken',token)
-  window.location.href='/home'
+  navigate('/home')
 }
   googleIn()
 }}
@@ -181,7 +141,7 @@ const Login = () => {
   onError={() => {
     console.log('Login Failed');
   }}
-/>;
+/>
        </div>
       </form>
     </div>

@@ -1,40 +1,29 @@
 import React, { useState} from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { GoogleLogin } from '@react-oauth/google';
 import {jwtDecode} from 'jwt-decode'
-import { useAdminLoginContext } from '../../Context/AdminContext';
-
+import { setAdminAuthenticated, selectIsAdminAuthenticated } from '../../redux/slices/adminAuthSlice';
+import baseURL from '../../apiConfig';
+import toastoptions from '../../toastConfig';
 
 
 const AdminLogin = () => {
+  const navigate = useNavigate()
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const {isAdminLoggedIn, adminlogin} = useAdminLoginContext()
- 
-
+  const dispatch = useDispatch()
+  const isAdminAuthenticated = useSelector(selectIsAdminAuthenticated)
   const handleLogin = async () => {
     try {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if(!email || !password){
-       toast.error("Provide Email and password",{
-        position: 'top-right',
-        autoClose: 3000, // milliseconds
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-       })
+       toast.error("Provide Email and password",toastoptions)
       }else if(!emailRegex.test(email)){
-        toast.error("Incorrect Email format",{
-          position: 'top-right',
-          autoClose: 3000, // milliseconds
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-         })
+        toast.error("Incorrect Email format",toastoptions)
       }else{
         let formdata = {
           email: email,
@@ -45,7 +34,7 @@ const AdminLogin = () => {
         console.log(accesstoken, 'in admin side');
     
         let resp = await axios.post(
-          'http://localhost:7000/admin/login',
+          `${baseURL}/admin/login`,
           formdata,
           {
             headers: {
@@ -55,62 +44,24 @@ const AdminLogin = () => {
           }
         );
     
-        console.log(resp, 'resp');
-        console.log('in login');
-    
         if (resp.data && resp.data.accesstoken) {
-          toast.success('Successfully logged', {
-            position: 'top-right',
-            autoClose: 3000, // milliseconds
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-          });
-          Cookies.set('admintoken', resp.data.accesstoken, { expires: 7 });
-          adminlogin()
-          window.location.href = '/dashboard';
+          toast.success('Successfully logging', toastoptions);
+          Cookies.set('admintoken', resp.data.accesstoken, { expires: 7 }); 
+          dispatch(setAdminAuthenticated(true))
+          window.location.href = '/dashboard'
         }   else if(resp.data.message==='Invalid password'){
-          toast.error("Invalid Password", {
-            position: 'top-right',
-            autoClose: 3000, // milliseconds
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-          })
+          toast.error("Invalid Password", toastoptions)
         }else if (resp.data.message==='incorrect token'){
-          toast.error("Invalid token", {
-            position: 'top-right',
-            autoClose: 3000, // milliseconds
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-          })
+          toast.error("Invalid token",toastoptions)
         }
         else {
-          toast.error(resp.data.message, {
-            position: 'top-right',
-            autoClose: 3000, // milliseconds
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-          })
+          toast.error(resp.data.message, toastoptions)
         }
       }
     } catch (error) {
       console.log("Axios Error:", error);  // Log the error to the console
   
-    toast.error(`Axios Error: ${error.message}`, {
-      position: 'top-right',
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-    });
+    toast.error(`Axios Error: ${error.message}`, toastoptions);
     }
   };
   
@@ -186,8 +137,7 @@ const AdminLogin = () => {
     "Authorization":`Bearer ${accesstoken}`
   }})
   const token = resp.data.accesstoken
-  adminlogin()
-  
+  setAdminAuthenticated(true)  
   Cookies.set('adminaccesstoken',token)
   window.location.href='/dashboard'
 }
@@ -196,6 +146,7 @@ const AdminLogin = () => {
 
   onError={() => {
     console.log('Login Failed');
+    setAdminAuthenticated(false)
   }}
 />;
 </div>
