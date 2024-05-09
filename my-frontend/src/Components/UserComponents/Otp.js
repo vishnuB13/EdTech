@@ -1,22 +1,26 @@
 // OTP.js
 import axios from "axios";
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import { useLoginContext } from "../../Context/LoginContext";
 import baseURL from "../../apiConfig";
 import toastoptions from "../../toastConfig";
+import Contact from "./Contact";
 
 
 
 const OTPVerification = ({ name, email, password, OTP }) => {
+  const Navigate = useNavigate()
+
+  const [generatedotp, setGenerate] = useState("")
   const [enteredOTP, setEnteredOTP] = useState("");
   const [timer, setTimer] = useState(60);
   const [expired, setExpired] = useState(false);
-  const [verify,setVerify]=useState(true)
+  const [verify, setVerify] = useState(true)
   const [resendButton, setResendButton] = useState(false);
-  const [otpform,setOtpForm]=useState(false) 
-
+  const [otpform, setOtpForm] = useState(false)
   const { login, logout } = useLoginContext();
 
   useEffect(() => {
@@ -33,62 +37,43 @@ const OTPVerification = ({ name, email, password, OTP }) => {
     return () => clearTimeout(countdown);
   }, [timer, expired]);
 
+  useEffect(() => {
+    setGenerate(OTP); // Update generatedotp state with OTP
+  }, [OTP]);
+
   const handleVerify = async () => {
-    const bodydata = { name, email, password };
-    if(!enteredOTP){
-      toast.error("Enter valid otp",toastoptions )
-    }else if(enteredOTP.length!==6){
-      toast.error("Invalid 6 digit otp",toastoptions)
-    }else{
-      if (enteredOTP === OTP) {
-        // If OTP is correct, you can proceed with further actions
-        console.log("OTP verification successful");
-        try {
-          let data = await axios.post(`${baseURL}/user/password-otp`, bodydata, {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-  
-          if (data.data.message === 'Successfully registered') {
-            toast.promise(
-              Promise.resolve(),
-              {
-                pending: 'Processing...',
-                success: 'Successfully registered',
-                error: 'Registration failed',
-              },
-              {
-                position: 'top-right',
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-              }
-            ).then(() => {
-              // After the toast is completed, redirect to the home page
-              Cookies.set('accesstoken', data.data.accesstoken, { expires: 7 });
-              login();
-              window.location.href = '/home';
-            });
-          } else {
-            toast.error(data.data.message, toastoptions);
-            console.log('error in toast');
-          }
-        } catch (error) {
-          console.error('Error in OTP verification:', error);
+    setGenerate(OTP); // Update generatedotp state with OTP
+    const bodydata = { name, email, password, enteredOTP, generatedotp };
+    let data = await axios.post(`${baseURL}/user/verify-otp`, bodydata)
+    console.log(data, "response from backend")
+    if (data.data.message === 'Successfully registered') {
+      toast.promise(
+        Promise.resolve(),
+        {
+          pending: 'Processing...',
+          success: 'Successfully registered',
+          error: 'Registration failed',
+        },
+        {
+          position: 'top-right',
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
         }
-      } else if (expired) {
-        toast.error("OTP has expired",toastoptions);
-        setExpired(false);
-      } else {
-        // Handle incorrect OTP
-        toast.error("Incorrect OTP",toastoptions);
-        console.log("Incorrect OTP");
-        // You can show an error message or take appropriate action
-      }
-    } 
+      ).then(() => {
+        Cookies.set('accesstoken', data.data.accesstoken, { expires: 7, path: '/' });
+        Navigate('/login')
+      })
+
+    } else if (data.data.message === 'incorrect otp') {
+      toast.error(data.data.message, toastoptions)
+    } else {
+      toast.error(data.data.message, toastoptions)
+    }
+
+
   };
 
   const handleResendOTP = async () => {
@@ -98,23 +83,22 @@ const OTPVerification = ({ name, email, password, OTP }) => {
       setExpired(false);
       setResendButton(false);
       // Add logic to resend OTP
-      const bodydata = { name, email, password };
-      console.log(name,"name in verify otp")
+      const bodydata = { name, email, password, OTP };
+      console.log(name, "name in verify otp")
 
-     
-        // try {
-          let data = await axios.post(`${baseURL}/user/resend-otp`, bodydata, {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
 
-  
-          if(data.data.otpsend){
-            setOtpForm(true)
-           }else{
-            toast.error("otp resending error",toastoptions)
-          }
+      let data = await axios.post(`${baseURL}/user/resend-otp`, bodydata, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (data.data.otpsend) {
+
+        setGenerate(data.data.OTP)
+        setOtpForm(true)
+      } else {
+        toast.error("otp resending error", toastoptions)
+      }
     } catch (error) {
       console.error('Error in resending OTP:', error);
     }
@@ -135,14 +119,14 @@ const OTPVerification = ({ name, email, password, OTP }) => {
         onChange={(e) => setEnteredOTP(e.target.value)}
         className="mt-1 p-2 w-full border rounded-md"
       />
-      {verify&& <button
+      {verify && <button
         onClick={handleVerify}
         className="mt-4 bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600"
       >
         Verify OTP
       </button>}
 
-      {timer>0 ? (<p className="text-color-blue-500">Your OTP will expire in {timer} seconds</p>):(<p>Otp expired! Resend?</p>)}
+      {timer > 0 ? (<p className="text-color-blue-500">Your OTP will expire in {timer} seconds</p>) : (<p>Otp expired! Resend?</p>)}
 
       {resendButton && (
         <button

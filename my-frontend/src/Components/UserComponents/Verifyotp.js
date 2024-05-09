@@ -43,7 +43,10 @@ const Verifyotp = () => {
     })
    if(response.data.message==='correct otp'){
     navigate('/new_password', { state: { email } });
-  }else{
+  }else if(response.data.message==='incorrect otp'){
+    toast.error("incorrect otp",toastoptions)
+  }
+  else{
     navigate('/login')
    }
   }

@@ -1,25 +1,23 @@
 import React from "react";
-import { useState,useEffect } from "react";
+import { useState } from "react";
 import {useNavigate} from 'react-router-dom'
-import { Suspense } from "react";
-import LoadingUI from "../UserComponents/Loading.js";
 import TutorLogin from "./TutorLogin.js";
 import axios from 'axios'
 import { toast } from "react-toastify";
 import baseURL from "../../apiConfig.js";
 import toastoptions from "../../toastConfig.js";
+import { isStrongPassword, validateEmail } from "../../toastConfig.js";
 const OTPtutorVerification = React.lazy(() => import('../TutorComponents/TutorOtp.js'));
 
 
 let generatedotp
 
 const TutorRegister = ({ isOpen, onClose }) => {
-  // ... (other state variables)
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [password2, setPassword2] = useState("")
   const [generatedotp,setGeneratedOtp] = useState("")
   const [otpform, setOtpForm] = useState(false)
   const [otpReady, setOtpReady] = useState(false);
@@ -39,11 +37,14 @@ const TutorRegister = ({ isOpen, onClose }) => {
   }
   const handleRegister = async () => {
     try {
-      if(!email){
-       toast.error("Provide an email",toastoptions)
-      }else if(!emailRegex.test(email)){
-        toast.error("Invalid Email Format",toastoptions)
-      }
+
+     const strongPassword = isStrongPassword(password)
+      const emailerror = validateEmail(email)
+      if (!email) { toast.error("please provide email", toastoptions) }
+      else if (password !== password2) { toast.error("Passwords not matching", toastoptions) }
+      else if (!password || !password2) { toast.error('please provide password', toastoptions) }
+      else if(typeof(strongPassword) !=='boolean'){toast.error(strongPassword[0],toastoptions)}
+      else if (typeof(emailerror)!== 'boolean') {toast.error(emailerror[0], toastoptions) }
       else{
         const resp = await axios.post(`${baseURL}/tutor/register`, formdata, {
           headers: {
@@ -61,8 +62,6 @@ const TutorRegister = ({ isOpen, onClose }) => {
           toast.error(resp.data.message,toastoptions)
          }
          else{
-          // generatedotp = await resp.data.OTP
-          // console.log(generatedotp,"generatedotp")
           if (await resp.data.otpsend) {
             setOtpReady(true);
             setOtpForm(true);
@@ -75,12 +74,6 @@ const TutorRegister = ({ isOpen, onClose }) => {
       console.error('Error during fetchFormResponse:', error.message); 
     }
   };
-
-//   useEffect(() => {
-//     if (otpform && generatedotp) {
-//       setOtpReady(true);
-//     }
-//   }, [otpform]);
 
   return (
     <div
@@ -140,6 +133,21 @@ const TutorRegister = ({ isOpen, onClose }) => {
                 name="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                className="mt-1 p-2 w-full border rounded-md"
+                placeholder="********"
+              />
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-600">
+                Password 2
+              </label>
+              <input
+                type="text"
+                id="password2"
+                name="password2"
+                value={password2}
+                onChange={(e) => setPassword2(e.target.value)}
                 className="mt-1 p-2 w-full border rounded-md"
                 placeholder="********"
               />

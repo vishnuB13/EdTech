@@ -2,12 +2,12 @@ import React from "react";
 
 const Footer = () => {
   return (
-    <footer className="bg-gradient-to-r from-pink-800 to-teal-800 text-white p-4 md:p-6 bottom-0 w-full">
+    <footer className="bg-gray-500 text-white p-4 md:p-6 bottom-0 w-full">
   <div className="container mx-auto">
     <div className="flex flex-col md:flex-row lg:flex-row justify-between">
       {/* Footer section 1: Logo and Site Name */}
       <section className="mb-4 md:mb-0">
-        <h1 className="text-lg md:text-2xl lg:text-2xl font-bold">Your Logo or Site Name</h1>
+        <h1 className="text-lg md:text-2xl lg:text-2xl font-medium">Ed-Tech</h1>
         <p className="text-xs md:text-sm">Providing quality education online</p>
       </section> 
 

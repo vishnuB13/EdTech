@@ -1,6 +1,8 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const Admin = require('../models/adminSchema')
+const Course = require('../models/courseSchema')
+const Category = require('../models/categorySchema')
 const { json } = require('express')
 
 const getLogin = async (req, res) => {
@@ -80,10 +82,109 @@ const adminDetails = async(req,res)=>{
 }
 }
 
+const addCategory=async(req,res)=>{
+  try {
+    console.log(req.body,"reqbody in add course controller")
+    const { coursename, courseImage, courseDescription } = req.body
+    console.log(coursename,"name")
+    console.log(courseImage,"image")
+    console.log(courseDescription,"description")
+    if(!courseImage){res.json({message:"Image not uploaded successfully"})}
+    let courseAlreadyExist = await Category.findOne({ categoryName: coursename })
+    if(courseAlreadyExist){
+        res.json({message:"Category already exists"})
+    } else {
+        const newCategory = { categoryName: coursename, categoryImage: courseImage, categoryDescription: courseDescription }
+        let categoryCreated = await new Category(newCategory)
+        categoryCreated.save()
+        res.json({message:"Category Successfully Created"})
+    }
+} catch (error) {
+    console.log(error,"error in catch")
+}
+}
+
+
+const getCategories = async(req,res)=>{
+  try{
+    let data = await Category.find({})
+   console.log(data,'data from database')
+   res.json(data)
+  }catch(error){
+console.log(error,"error")
+  }  
+}
+
+const categoryEdit = async(req,res)=>{
+try {
+  await Category.updateOne({"_id":req.body.categoryId},req.body.updatedCategory)
+  res.json({message:"Successfully edited"})
+} catch (error) {
+  console.log(error,"error in edit catch")
+}
+}
+
+const ChangeListed = async(req, res) => {
+  try {
+    const { categoryId, isListed } = req.body;
+    await Category.updateOne({ "_id": categoryId }, { "isListed": isListed });
+    if (isListed) {
+      res.json({ message: "Successfully Listed" });
+    } else {
+      res.json({ message: "Successfully Unlisted" });
+    }
+  } catch (error) {
+    console.error("Error updating category list status:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+
+const addCourses=async(req,res)=>{
+  try {
+    console.log(req.body,"reqbody in add course controller")
+    const { coursename, courseImage, courseDescription, courseCategory } = req.body
+    console.log(coursename,"name")
+    console.log(courseImage,"image")
+    console.log(courseDescription,"description")
+    console.log(courseCategory,'category')
+    let courseAlreadyExist = await Course.findOne({ courseName: coursename })
+    if(courseAlreadyExist){
+        res.json({message:"Course already exists"})
+    } else {
+        const newCourse = { coursename: coursename, courseImage: courseImage, courseDescription: courseDescription, courseCategory:courseCategory }
+        let courseCreated = await new Course(newCourse)
+        courseCreated.save()
+        res.json({message:"Course Successfully Created"})
+    }
+} catch (error) {
+    console.log(error,"error in catch")
+    res.json({message:error.message})
+}
+}
+
+const getCourses = async(req,res)=>{
+  try{
+    let data = await Course.find({})
+   console.log(data,'data from database')
+   res.json(data)
+  }catch(error){
+console.log(error,"error")
+  }  
+}
+
+
 
 module.exports={
     getLogin,
     adminLogout,
     googleSignIn,
-    adminDetails
+    adminDetails,
+    addCategory,
+    getCategories,
+    categoryEdit,
+    ChangeListed,
+    addCourses,
+    getCourses
 }

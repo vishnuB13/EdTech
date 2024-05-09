@@ -8,6 +8,7 @@ import axios from 'axios'
 import { toast } from "react-toastify";
 import baseURL from "../../apiConfig.js";
 import toastoptions from "../../toastConfig.js";
+import { isStrongPassword, validateEmail } from "../../toastConfig.js";
 const OTPVerification = React.lazy(() => import('./Otp.js'));
 
 
@@ -39,19 +40,19 @@ const RegisterModal = ({ isOpen, onClose }) => {
   const handleCancel = async () => {
     navigate('/')
   }
+ 
   const handleRegister = async () => {
 
 
     try {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-
+      const strongPassword = isStrongPassword(password)
+      const emailerror = validateEmail(email)
       if (!email) { toast.error("please provide email", toastoptions) }
       else if (password !== password2) { toast.error("Passwords not matching", toastoptions) }
       else if (!password || !password2) { toast.error('please provide password', toastoptions) }
-      else if (!emailRegex.test(email)) {
-        toast.error('Incorrect Email Format', toastoptions)
-      }
+      else if(typeof(strongPassword) !=='boolean'){toast.error(strongPassword[0],toastoptions)}
+      else if (typeof(emailerror)!== 'boolean') {toast.error(emailerror[0], toastoptions) }
       else {
         const resp = await axios.post(`${baseURL}/user/register`, formdata, {
           headers: {
