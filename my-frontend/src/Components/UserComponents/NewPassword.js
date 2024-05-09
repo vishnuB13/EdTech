@@ -5,6 +5,10 @@ import { toast } from 'react-toastify'
 import { useLocation, useNavigate } from 'react-router-dom'
 import baseURL from '../../apiConfig'
 import toastoptions from '../../toastConfig'
+import { isStrongPassword } from '../../toastConfig'
+
+
+
 const NewPassword = () => {
     const [password, setPassword] = useState('')
     const [password2, setPassword2] = useState('')
@@ -16,6 +20,7 @@ const NewPassword = () => {
 
     const handleVerify = async (e) => {
         e.preventDefault();
+        const strongPassword = isStrongPassword(password)
         
         const data = { password: password, email: email };
         try {
@@ -24,7 +29,10 @@ const NewPassword = () => {
                 toast.error("Fill all fields", toastoptions);
             } else if (password !== password2) {
                 toast.error("Password not matching",toastoptions );
-            } else {
+            } else if (!strongPassword){
+                toast.error(strongPassword.criteriaNotMet[0],toastoptions)
+            }
+             else {
 
                const response = await axios.put(`${baseURL}/user/change_password`, data, {
                     headers: {
@@ -35,7 +43,11 @@ const NewPassword = () => {
                 if (response.data.message === 'Successfully Changed') {
                     toast.success("Successfully Changed", toastoptions)
                         navigate('/login')      
-                } else {
+                }else if(response.data.message==='User Not Found'){
+                    navigate('/register')
+                    toast.error("Email not registered yet!",toastoptions)
+                }
+                 else {
                     toast.error(response.data.message, toastoptions);
                 }
             }

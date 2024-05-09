@@ -1,5 +1,6 @@
 // LoginContext.js
 import { createContext, useContext, useState } from 'react';
+import Cookies from 'js-cookie';
 
 const LoginContext = createContext();
 
@@ -21,6 +22,7 @@ export const LoginProvider = ({ children }) => {
   };
 
   const logout = () => {
+    Cookies.remove('accesstoken')
     setLoggedIn(false);
   };
 

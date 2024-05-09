@@ -1,6 +1,23 @@
 import React from 'react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import toastoptions from '../../toastConfig';
+import baseURL from '../../apiConfig';
+const handleTutorLogout =async()=>{
+  try {
+    const resp = await axios.get(`${baseURL}/tutor/logout`)
+    if(resp.data.message==='successfully logged out'){
+      window.location.href='/'
+    }else{
+      toast.error("Logout unsuccessful",toastoptions) 
+    }
+  } catch (error) {
+    console.log(error,"errorin logout") 
+    toast.error("catch error",toastoptions)
+  }
+}
 
-const TutorDashboard = () => {
+const TutorDashboard = () => { 
   return (
     <div className="flex h-screen">
       {/* Left Menu */}
@@ -12,31 +29,31 @@ const TutorDashboard = () => {
         <ul>
           <li className="mb-2">
             <a href="/users" className="hover:text-blue-500">
-              Users
+              Users 
             </a>
           </li>
           <li className="mb-2">
-            <a href="/tutors" className="hover:text-blue-500">
-              Tutors
+            <a href="/tutor/modules" className="hover:text-blue-500">
+              Upload modules
             </a>
           </li>
           <li className="mb-2">
             <a href="/courses" className="hover:text-blue-500">
-              Courses
+              Notifications
             </a>
           </li>
           <li className="mb-2">
             <a href="/orders" className="hover:text-blue-500">
-              Orders
+              Analytics
             </a>
           </li>
           <li className="mb-2">
-            <a href="/banners" className="hover:text-blue-500">
-              Banners
+            <a href="/orders" className="hover:text-blue-500">
+              Module Management
             </a>
           </li>
           <li>
-            <a href="/logout" className="hover:text-red-500">
+            <a href='/tutor/logout' onClick={handleTutorLogout} className="hover:text-red-500">
               Logout
             </a>
           </li>

@@ -33,8 +33,8 @@ const TutorLogin = () => {
       tutorlogin()
       toast.success("Successfully Logged", toastoptions)
         // After the toast is completed, redirect to the home page
-        Cookies.set('tutoraccesstoken', resp.data.accesstoken, { expires: 7 });
-        window.location.href='/home'
+        Cookies.set('tutoraccesstoken', resp.data.tutoraccesstoken, { expires: 7 });
+        // window.location.href='/tutor/dashboard'
       
     }
     else if(resp.data.message==='Invalid password'){

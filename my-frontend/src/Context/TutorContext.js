@@ -1,5 +1,6 @@
 // LoginContext.js
 import { createContext, useContext, useState } from 'react';
+import Cookies from 'js-cookie';
 
 const TutorLoginContext = createContext();
 
@@ -21,6 +22,7 @@ export const TutorLoginProvider = ({ children }) => {
   };
 
   const tutorlogout = () => {
+    Cookies.remove('tutoraccesstoken')
     setTutorLoggedIn(false);
   };
 

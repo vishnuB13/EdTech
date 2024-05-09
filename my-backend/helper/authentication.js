@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const secretKey = 'secret key'
 
-const authenticateToken = (req, res, next) => {
+const authenticateToken = (requiredRole) => (req, res, next) => {
     try {
         const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
         console.log(token,"token in authenticate token")
@@ -14,10 +14,18 @@ const authenticateToken = (req, res, next) => {
                 console.error(err, "Error in verifying token");
                 return res.json({ message: 'Invalid token' });
             }
-
+            else   if (requiredRole && result.role !== requiredRole){
+                return res.status(403).json({ message: 'Insufficient permissions' });
+            }
+           else{
             console.log(result, "Result in authenticate token");
             req.user = result;
-            next();
+            req.user.role=result.role
+             next();
+           }
+               
+            
+          
         });
     } catch (error) {
         console.error(error, "Error in authenticate middleware");

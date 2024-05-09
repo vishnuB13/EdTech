@@ -1,6 +1,7 @@
 // OTP.js
 import axios from "axios";
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
 import { useTutorLoginContext } from "../../Context/TutorContext";
@@ -8,7 +9,9 @@ import baseURL from "../../apiConfig";
 import toastoptions from "../../toastConfig";
 
 const OTPtutorVerification = ({ name, email, password, OTP }) => {
+  const navigate = useNavigate()
   const [enteredOTP, setEnteredOTP] = useState("");
+  const [generatedotp, setGenerate] = useState("");
   const [verifybutton, setVerifyButton] = useState(true)
   const [timer, setTimer] = useState(60); // Initial timer value in seconds
   const [expired, setExpired] = useState(false);
@@ -20,6 +23,7 @@ const OTPtutorVerification = ({ name, email, password, OTP }) => {
       if (timer > 0) {
         setTimer(timer - 1);
       } else {
+        setVerifyButton(false)
         setResendButton(true);
         setTimer(60);
         setExpired(true);
@@ -28,11 +32,15 @@ const OTPtutorVerification = ({ name, email, password, OTP }) => {
 
     return () => clearTimeout(countdown);
   }, [timer, expired]);
+  useEffect(() => {
+    setGenerate(OTP); // Update generatedotp state with OTP
+  }, [OTP]);
 
   const handleVerify = async () => {
+    setGenerate(OTP); // Update generatedotp state with OTP
     const bodydata = { name, email, password };
-    console.log(enteredOTP,"entered otp")
-    console.log(OTP,'received otp')
+    console.log(enteredOTP, "entered otp")
+    console.log(OTP, 'received otp')
     if (enteredOTP === OTP) {
       // If OTP is correct, you can proceed with further actions
       try {
@@ -61,11 +69,12 @@ const OTPtutorVerification = ({ name, email, password, OTP }) => {
               pauseOnHover: true,
               draggable: true,
             }
-          ).then(() => {
+          ).then((data) => {
             // After the toast is completed, redirect to the home page
+            console.log(data,"data in tutor registration")
             Cookies.set('tutoraccesstoken', data.data.tutoraccesstoken, { expires: 7 });
             tutorlogin();
-            window.location.href = '/tutor/dashboard';
+            navigate('/tutor/login');
           });
         } else {
           toast.error(data.data.message, toastoptions);
@@ -87,64 +96,25 @@ const OTPtutorVerification = ({ name, email, password, OTP }) => {
 
   const handleResendOTP = async () => {
     try {
+      setVerifyButton(true)
       setTimer(60); // Reset timer
       setExpired(false);
       setResendButton(false);
       // Add logic to resend OTP
-      const bodydata = { name, email, password };
+      const bodydata = { name, email, password, OTP };
+      console.log(name, "name in verify otp")
 
-      if (enteredOTP === OTP) {
-        // If OTP is correct, you can proceed with further actions
-        try {
-          let data = await axios.post(`${baseURL}/tutor/verify-otp`, bodydata, {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-  
-          console.log(data, "data received");
-          console.log(data.data.message, "message response");
-  
-          if (data.data.message === 'Successfully registered') {
-            toast.promise(
-              Promise.resolve(),
-              {
-                pending: 'Processing...',
-                success: 'Successfully registered',
-                error: 'Registration failed',
-              },
-              {
-                position: 'top-right',
-                autoClose: 3000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-              }
-            ).then(() => {
-              // After the toast is completed, redirect to the home page
-              Cookies.set('tutoraccesstoken', data.data.tutoraccesstoken, { expires: 7 });
-              tutorlogin();
-              window.location.href = '/tutor/dashboard';
-            });
-          } else {
-            toast.error("Invalid token",toastoptions);
-            console.log('error in toast');
-          }
-        } catch (error) {
-          console.error('Error in OTP verification:', error);
-        }
-      } else if (expired) {
-        toast.error("OTP has expired", toastoptions);
-        setExpired(false);
+
+      let data = await axios.post(`${baseURL}/tutor/resend-otp`, bodydata, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (data.data.otpsend) {
+        setGenerate(data.data.OTP)
       } else {
-        // Handle incorrect OTP
-        toast.error("Incorrect OTP", toastoptions);
-        tutorlogout();
-        console.log("Incorrect OTP");
-        // You can show an error message or take appropriate action
+        toast.error("otp resending error", toastoptions)
       }
-     
     } catch (error) {
       console.error('Error in resending OTP:', error);
     }
